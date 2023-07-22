@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block scripts %}
+
+<script src="{% static 'reports/upload.js' %}" defer></script>
+
+{% endblock scripts %}
+
+
+{% block title %}
+upload Sales Files
+{% endblock title %}
+
+
+{% block content %}
+
+<h5> Upload your Sales Document</h5>
+
+<br>
+
+<div id="alert-box">
+  
+</div>
+
+{% comment %}    dz is a class name given to identify styling {% endcomment %}
+
+{% comment %} 
+
+RESC:: 
+https://docs.dropzone.dev/getting-started/setup/fallback-for-no-javascript
+
+{% endcomment %}
+
+<form id="my-dropzone" class="dropzone dz">
+    {% csrf_token %}
+    <div class="fallback">
+      <input name="file" type="file" multiple />
+    </div>
+</form>
+
+{% endblock content %}

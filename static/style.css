@@ -1,0 +1,48 @@
+.not-visible {
+    display: none;
+}
+
+
+/* For DropZone */
+/* To create Dashed border & on hover color change with transition */
+.dz {
+    border-style: dashed;
+    border-radius: 5px;
+    border-color: #ddd;
+    transition: .5s;
+}
+
+
+.dz:hover {
+    background-color: #f5f5f5;
+}
+
+.avatar-sm {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+}
+.avatar-big {
+    height:200px;
+    width: 200px;
+    border-radius:50%;
+}
+
+.logo-sm {
+    height: 30px;
+    width: 30px;
+}
+
+
+.image-sm {
+    height: 100px;
+    width: 300px;
+}
+
+
+.image-sm:hover {
+    -ms-transform: scale(3); /* IE 9 */
+    -webkit-transform: scale(3); /* Safari 3-8 */
+    transform: scale(3); 
+  }
+  

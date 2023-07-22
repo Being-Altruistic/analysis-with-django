@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Report Lists
+
+{% endblock title %}
+
+
+{% block content %}
+
+{% comment %} <hr> {% endcomment %}
+
+
+
+
+
+<table class="table table-bordered border-secondary main">
+    <thead>
+      <tr>
+        <th scope="col">Report No.</th>
+        <th scope="col">Name</th>
+        <th scope="col">Image</th>
+        <th scope="col">Remark</th>
+        <th scope="col">Created</th>
+        <th scope="col">View PDF</th>
+        <th scope="col">Detail</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for obj in report_list_obj %}
+
+      <tr id="row_{{obj.pk}}">
+        <td>
+            RepNo/{{obj.pk}}
+        </td>
+        <td>{{obj.name}}</td>
+        
+
+        
+        {% if obj.image %}
+        <td><img src="{{obj.image.url}}" class="card-img-top image-sm" alt="{{obj.name}}"></td>
+        {%else%}
+        <td>No Image</td>
+        {% endif %}
+
+        
+        <td>{{obj.remarks|truncatewords:2}}</td>
+
+        <td>{{obj.created|truncatewords:1}}</td>
+
+        {% if obj.image %}
+        <td><a href="{% url 'reports:pdf-page' obj.pk %}" class="btn btn-secondary">PDF</a></td>
+        {%else%}
+        <td><a href="#" class="btn btn-secondary disabled">PDF</a></td>
+        {% endif %}
+
+        
+        <td><a href={{obj.get_absolute_url}} class="btn btn-primary">Details</a></td>
+
+        {% comment %} <td><a href="{% url 'reports:delete' obj.pk %}" class="btn btn-danger">D</a></td> {% endcomment %}
+
+
+
+
+      </tr>
+
+    {% endfor %}
+    
+    </tbody>
+  </table>
+
+
+
+
+
+{% endblock content %}

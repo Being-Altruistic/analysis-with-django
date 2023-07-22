@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+{{report_detail_obj.name}}
+
+{% endblock title %}
+
+
+{% block content %}
+
+{% if report_detail_obj.image %}
+
+    <img src="{{report_detail_obj.image.url}}" alt="{{report_detail_obj.name}}"></img>
+
+{% endif %}
+    <br>
+    <h3> Remarks </h3>
+    {{report_detail_obj.remarks}}
+
+    <hr>
+    <p> author: {{report_detail_obj.author.user.username}}</p>
+    <p> created: {{report_detail_obj.created}}</p>
+{% endblock content %}
