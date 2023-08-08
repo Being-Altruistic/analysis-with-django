@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+
+    {% block title %}
+
+    {{report_detail_obj.name}}
+
+    {% endblock title %}
+
+
+    {% block content %}
+
+    {% if allow_view %}
+
+        {% if report_detail_obj.image %}
+
+            <img src="{{report_detail_obj.image.url}}" alt="{{report_detail_obj.name}}"></img>
+
+        {% endif %}
+            <br>
+            <h3> Remarks </h3>
+            {{report_detail_obj.remarks}}
+
+            <hr>
+            <p> author: {{report_detail_obj.author.user.username}}</p>
+            <p> created: {{report_detail_obj.created}}</p>
+    
+            <br>
+            <hr>
+            <h3>Opinions / Reviews / Actions</h3><br>
+
+            <form action="{% url 'reports:secured_detail' pk=report_detail_obj.id token=token %}" method="post">
+
+                {% csrf_token %}
+                <div class="form-floating">
+                
+                    <textarea class="form-control" id="floatingTextarea2" name="floatingTextarea2" style="height: 100px"></textarea>
+                    <label for="floatingTextarea2">Opinions / Reviews / Actions</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Post</button>
+            </form>
+
+            <br><hr>
+            <h3>Peers' Space</h3>
+
+            {% if all_comments %}
+
+                {% for comment in all_comments %}
+                
+                    <div class="card" style="width: 50em;">
+                        <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-body-secondary">{{comment.assigned_to}} </h6>
+                        <p class="card-text">{{comment.comments|safe}}</p>
+                        </div>
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+                    Nothing here | Post your's now
+
+            {% endif %}
+
+
+
+  
+    {% else %}
+    <div class="alert alert-danger" role="alert">
+        <h2>The Link seems to be broken or You have no privileges. <br>
+            Please contact the administrator
+        </h2>
+    </div>
+
+    {% endif %}
+    {% endblock content %}
+
+
+
+

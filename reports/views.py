@@ -1,8 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from profiles.models import Profile
 from django.http import JsonResponse
-from .utils import get_report_image
-from .models import Report
+from .utils import get_report_image, remove_record
+from .models import Report, assign_peers
 from django.views.generic import ListView, DetailView, TemplateView
 
 
@@ -24,14 +24,153 @@ from django.contrib.auth.decorators import login_required
 #  Protecting Class based Views using Mixins 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+import uuid, random
+from django.contrib.auth.models import User
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from analysis_with_django.settings import EMAIL_HOST_USER
 
 
 
 
-def ReportDelete(request, pk):
-    print('DELETEDELETE >><<<$$@@@', pk)
-    Report.objects.get(pk=pk).delete()
-    return JsonResponse({'msg': 'deleted'})
+@login_required
+def ReportDetailViewSecured(request, pk, token):
+
+    rep = Report.objects.get(pk=pk)
+
+
+    if request.method == 'POST':
+        print(request.POST)
+        instance = assign_peers.objects.get(token = token, assigned_to = request.user, report = rep)
+        instance.comments = request.POST.get('floatingTextarea2')
+        instance.save()
+
+        
+    if assign_peers.objects.filter(token = token, assigned_to = request.user, report = rep).exists() or assign_peers.objects.filter(assigned_by = request.user).exists():
+
+        qs = assign_peers.objects.filter(token = token, report = rep, assigned_by=request.user)
+
+
+        for i in qs:
+            i.notification="VIEWED"
+
+        assign_peers.objects.bulk_update(qs, ['notification'])
+        
+        context ={
+            'allow_view':True,
+            'report_detail_obj':rep,
+            'token':token,
+            'all_comments':assign_peers.objects.filter(token = token, report = rep, comments__isnull= False),
+            'request': request
+        }
+
+    else:
+        context ={
+                'allow_view':False
+            }
+    
+
+    return render(request, 'reports/pvt_detail.html',context)
+
+
+
+
+
+def assign_report(request,pk):
+    if request.method == 'POST':
+
+        print('request::>>', request.POST)
+
+        
+        if request.POST.get('operation',False):
+            return remove_record(pk,request)
+
+
+        if request.POST.getlist('emails') != []:
+            
+            print('request::>>', request.POST.getlist('emails'))
+
+
+            if assign_peers.objects.filter(report_id=pk).exists():
+                assign_peers.objects.filter(report_id=pk).delete()
+
+
+
+            token_access = str(uuid.uuid4()).replace('-','').lower()[:12]+str(random.randint(0,9))
+
+            # Objects for Bulk Create
+            qs_objects = []
+
+            for i in request.POST.getlist('emails'):
+                print(i)
+                qs_objects.append(
+                    
+                                assign_peers(
+                                                assigned_by = request.user,
+                                                assigned_to = User.objects.get(username = i),
+                                                token = token_access,
+                                                report = Report.objects.get(id=pk)
+                                            )
+
+                                )
+
+            print(qs_objects)
+
+
+            # Bulk Create
+            assign_peers.objects.bulk_create(
+                qs_objects
+            )
+
+
+            # Get reports obj
+
+            report_obj = Report.objects.get(id=pk)
+            access_lnk_peer_obj = assign_peers.objects.filter(token = token_access, report = report_obj).first()
+
+
+
+
+
+            template_data = {
+                'repno':report_obj.id,
+                'name':report_obj.name,
+                'remark':report_obj.remarks,
+                'created':report_obj.created,
+
+                # build_absolute_uri
+                'access_link':request.build_absolute_uri(access_lnk_peer_obj.get_absolute_url()),
+            }
+
+            print('IMP TESTEST @@##$$', template_data)
+
+
+            html_body= render_to_string('reports/assign_peer_emailtemp.html', template_data)
+
+            msg = EmailMultiAlternatives(
+                subject="Important! |  Invite to Peer Review the attached Sales Report.",
+
+                body=html_body,
+
+                # From Asigned by | Reply to Assigned By | to Assigned to
+
+                from_email=EMAIL_HOST_USER,
+
+                to=request.POST.getlist('emails'),
+
+                reply_to=[EMAIL_HOST_USER],
+            )
+
+            msg.mixed_subtype = 'related'
+            msg.attach_alternative(html_body, "text/html")
+
+            msg.send()
+        
+        else:
+            print('No Data')
+
+
+    return JsonResponse({'msg':request.POST})
 
 
 
@@ -125,6 +264,39 @@ class ReportListView(LoginRequiredMixin,ListView):
     model = Report
     template_name = 'reports/main.html'
     context_object_name = "report_list_obj"
+
+    def get_context_data(self, **kwargs):
+        context = super(ReportListView, self).get_context_data(**kwargs)
+
+        all_report_ids = Report.objects.all().values_list('id')
+
+
+        context.update({
+            'assign_peers_qs': assign_peers.objects.filter(assigned_by=self.request.user,report_id__in=all_report_ids),
+            'users': User.objects.all(),
+            'notifications':assign_peers.objects.filter(assigned_by=self.request.user, report_id__in=all_report_ids, notification='NOTIFIED'),
+        })
+
+        print('MMYY KWARGS::>>', assign_peers.objects.filter(assigned_by=self.request.user, report_id__in=all_report_ids, notification='NOTIFIED'))
+        return context
+
+    
+''' For above Class
+def get_queryset(self):
+        return CharacterSeries.objects.order_by('name')
+
+
+        <<< ABOVE OP as of NOW >>> SAMPLE P TO LEARN >>>
+        MMYY KWARGS::>> {'paginator': None, 'page_obj': None, 'is_paginated': False, 'object_list': <QuerySet [<Report: aknasbcjna>, <Report: This Report for Quaterly Months>, <Report: eewaawd>, 
+        <Report: YOYYOYOYOOY>, <Report: dadad>, <Report: dadad>, <Report: dadad>, <Report: dadad>, <Report: adasas>, <Report: Test Report>]>, 'report_list_obj': <QuerySet [<Report: aknasbcjna>, 
+        <Report: This Report for Quaterly Months>, <Report: eewaawd>, <Report: YOYYOYOYOOY>, 
+        <Report: dadad>, <Report: dadad>, <Report: dadad>, <Report: dadad>, <Report: adasas>, <Report: Test Report>]>, 
+        'view': <reports.views.ReportListView object at 0x0000020F8004D430>, 
+        'assign_peers_qs': <QuerySet [<assign_peers: 04a2c62236e91:  admin[ > ]edumats100@gmail.com>, <assign_peers: 2facdbcb41a62:  admin[ > ]edumats100@gmail.com>, 
+        <assign_peers: 4e49d644f40b6:  admin[ > ]edumats100@gmail.com>]>}
+        
+'''
+        
     
 
 class ReportDetailView(LoginRequiredMixin,DetailView):

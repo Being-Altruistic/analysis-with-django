@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+
+        <b>Dear,</b><br>
+        <p>
+          Greetings!
+           You have been invited to peer-review the Sales report.<br>
+           <b>Please review the report by clicking the Secure link below</b>  
+        </p><br><br>
+
+
+        <table border 1>
+            <thead>
+              <tr>
+                <th scope="col">Report No.</th>
+                <th scope="col">Name</th>
+                <th scope="col">Remark</th>
+                <th scope="col">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+        
+              <tr>
+                <td>
+                    RepNo/{{repno}}
+                </td>
+                
+                <td>{{name}}</td>
+                                
+                <td>{{remark}}</td>
+        
+                <td>{{created}}</td>
+              </tr>
+        
+            
+            </tbody>
+          </table>
+        
+        <h1><a href={{access_link}}>Click here to Access Report</a></h1>
+        
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js"></script>
+    </body>
+</html>
+

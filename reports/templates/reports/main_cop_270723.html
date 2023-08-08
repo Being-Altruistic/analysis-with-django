@@ -32,7 +32,6 @@ Report Lists
         <th scope="col">View PDF</th>
         <th scope="col">Detail</th>
         <th scope="col">Assign Reviewers</th>
-        <th scope="col">Notifications</th>
       </tr>
     </thead>
     <tbody>
@@ -89,41 +88,10 @@ Report Lists
               {% endfor %}
 
             </ul>
-            <select id="input-tag_{{obj.pk}}" placeholder="Enter Emails" autocomplete="off" onchange="printID(`{{obj.pk}}`)">
-              <option value="select">--Select--</option>
-
-                {%for user in users%}
-                    <option value="{{user.username}}">{{user.username}}</option>
-                {% endfor %}
-            
-            </select>
-            
+            <input type="text" id="input-tag_{{obj.pk}}" placeholder="Enter Emails" required autocomplete="off" onfocus="printID(`{{obj.pk}}`)"/>
             <input type="submit" id="button-tag_{{obj.pk}}" class="btn btn-warning" autocomplete="off" value="Assign"/>
-          
           </div>
 
-        </td>
-        
-        <td>
-          {% if notifications %}
-
-            {% for notification in notifications %}
-                
-              {% if notification.report.id == obj.pk %}
-
-                    <a href='assign_report/{{obj.pk}}/{{notification.token}}' class="btn btn-primary">New notification</a>
-              
-              {% endif %}
-            
-            {% endfor %}
-          
-          {% else %}
-
-          Nothing Here
-          
-          
-          {% endif %}
-        
         </td>
 
 

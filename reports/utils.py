@@ -1,5 +1,21 @@
 import base64, uuid
 from django.core.files.base import ContentFile
+from django.http import JsonResponse
+from reports.models import assign_peers
+from django.contrib.auth.models import User
+
+
+def remove_record(pk, request):
+    try:
+        if assign_peers.objects.filter(report_id=pk, assigned_to = User.objects.get(username = request.POST.get('username'))).exists():
+            user_obj = User.objects.get(username = request.POST.get('username'))
+            assign_peers.objects.filter(report_id=pk, assigned_to = user_obj).delete()
+        else:
+            return JsonResponse({'message':'OK','status':200})
+    except:
+        print('&&&&&^^ Error &&&&&&&&&^^^^^')
+
+
 
 def get_report_image(data):
     print('utils>>>>>><<>>>', data)
